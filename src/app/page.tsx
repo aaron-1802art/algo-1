@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 // Interfaces mirroring the actual ATS Algo Platform data structures
 export interface AlgoStrategy {
@@ -22,6 +23,19 @@ export interface BrokerBridge {
   status: 'DISCONNECTED' | 'AUTHENTICATED' | 'TOKEN_EXPIRED';
   tokenGeneratedAt?: string;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+};
 
 export default function AtsAlgoTerminal() {
   // 1. Core ATS Strategy Marketplace/Catalog State
@@ -71,12 +85,12 @@ export default function AtsAlgoTerminal() {
       return;
     }
     setIsAuthorizing(true);
-    setTerminalLogs(prev => [...prev, `[LOG] Dispatching encrypted handshakes to ${id.toUpperCase()} server matrices...`]);
+    setTerminalLogs(prev => [`[LOG] Dispatching encrypted handshakes to ${id.toUpperCase()} server matrices...`, ...prev]);
 
     setTimeout(() => {
       setBrokers(prev => prev.map(b => b.id === id ? { ...b, status: 'AUTHENTICATED', tokenGeneratedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) } : b));
       setIsAuthorizing(false);
-      setTerminalLogs(prev => [...prev, `[SUCCESS] Secure API bridge binding complete for ${id.toUpperCase()}. Daily token verified.`]);
+      setTerminalLogs(prev => [`[SUCCESS] Secure API bridge binding complete for ${id.toUpperCase()}. Daily token verified.`, ...prev]);
       setInputClientId('');
       setInputApiKey('');
     }, 1500);
@@ -87,10 +101,10 @@ export default function AtsAlgoTerminal() {
       if (s.id === id) {
         const nextState = !s.deployed;
         setTerminalLogs(logPrev => [
-          ...logPrev, 
           nextState 
             ? `[DEPLOYED] Activated execution loops for strategy: ${s.title}`
-            : `[PAUSED] Halted execution loops for strategy: ${s.title}. All open positions squared off.`
+            : `[PAUSED] Halted execution loops for strategy: ${s.title}. All open positions squared off.`,
+          ...logPrev
         ]);
         return { ...s, deployed: nextState, livePnl: 0 };
       }
@@ -103,58 +117,72 @@ export default function AtsAlgoTerminal() {
   const aggregatePnl = strategies.reduce((acc, curr) => acc + curr.livePnl, 0);
 
   return (
-    <div className="bg-[#0b0c10] text-zinc-100 p-6 font-mono min-h-[750px] border border-zinc-800 rounded-xl max-w-6xl mx-auto shadow-2xl flex flex-col justify-between">
+    <div className="bg-mesh-gradient text-zinc-100 min-h-screen p-4 md:p-8 font-mono selection:bg-indigo-500/30 overflow-hidden relative pb-32">
       
-      {/* APP HEADER */}
-      <div>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-800 pb-4 mb-6 gap-4">
+      {/* FLOATING PARTICLES OR LIGHTING LAYER (pure CSS glassmorphism base) */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-black/80 to-black/90 mix-blend-multiply" />
+
+      <div className="max-w-7xl mx-auto relative z-10 flex flex-col gap-6 h-full">
+        
+        {/* HEADER BENTO TILE */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-white/10 shadow-2xl"
+        >
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-              <h1 className="text-lg font-black tracking-wider text-white uppercase">ATS ALGO INTEGRATED TERMINAL</h1>
-            </div>
-            <p className="text-[11px] text-zinc-500 mt-1">Multi-Broker Automated Strategy Deployment Engine & Compliance Router</p>
-          </div>
-
-          {/* REALTIME PLATFORM OVERVIEW SUMMARY STRIP */}
-          <div className="flex gap-4 bg-[#12141c] border border-zinc-850 p-3 rounded-lg w-full md:w-auto justify-between md:justify-end">
-            <div className="px-2">
-              <span className="text-[9px] text-zinc-500 block uppercase">Total Running Margin</span>
-              <span className="text-xs font-bold text-white">₹{totalActiveCapital.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="border-l border-zinc-800 px-4">
-              <span className="text-[9px] text-zinc-500 block uppercase">Daily Unrealized P&L</span>
-              <span className={`text-xs font-bold ${aggregatePnl >= 0 ? 'text-emerald-400' : 'text-rose-500'}`}>
-                {aggregatePnl >= 0 ? '▲ +' : '▼ '}₹{aggregatePnl.toLocaleString('en-IN')}
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
               </span>
+              <h1 className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400 uppercase">
+                ATS ALGO TERMINAL
+              </h1>
             </div>
-            <div className="border-l border-zinc-800 px-2">
-              <span className="text-[9px] text-zinc-500 block uppercase">Active Bridges</span>
-              <span className="text-xs font-bold text-indigo-400">{brokers.filter(b => b.status === 'AUTHENTICATED').length} Connected</span>
+            <p className="text-xs text-zinc-400 mt-2 font-sans tracking-wide">Multi-Broker Automated Strategy Deployment Engine & Compliance Router</p>
+          </div>
+
+          <div className="flex gap-4 items-center">
+            <div className="px-3 py-1">
+              <span className="text-[10px] text-zinc-500 block uppercase tracking-wider">Total Running Margin</span>
+              <span className="text-sm font-bold text-white tabular-nums">₹{totalActiveCapital.toLocaleString('en-IN')}</span>
+            </div>
+            <div className="h-8 w-px bg-white/10" />
+            <div className="px-3 py-1">
+              <span className="text-[10px] text-zinc-500 block uppercase tracking-wider">Active Bridges</span>
+              <span className="text-sm font-bold text-indigo-400">{brokers.filter(b => b.status === 'AUTHENTICATED').length} Connected</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* WORKSPACE CONTENT SPLIT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* WORKSPACE CONTENT BENTO GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* LEFT 4 COLS: MULTI-BROKER ROUTING & DAILY VALIDATION TOKENS */}
-          <div className="lg:col-span-4 space-y-4">
-            <div className="bg-[#12141c] border border-zinc-850 rounded-lg p-4">
-              <h2 className="text-xs font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-800 pb-2 mb-3">
-                1. Broker Auth Gateways
+          {/* LEFT COLUMN: BROKER GATEWAYS (4 COLS) */}
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-4 flex flex-col gap-6"
+          >
+            <motion.div variants={itemVariants} className="glass-panel rounded-2xl p-6 border border-white/10 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <h2 className="text-xs font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2 mb-4">
+                <span className="w-1 h-1 bg-indigo-500 rounded-full" /> 1. Broker Gateways
               </h2>
               
-              {/* BROKER SELECTION ROW */}
-              <div className="space-y-2">
+              <div className="space-y-3 relative z-10">
                 {brokers.map((b) => (
-                  <div
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     key={b.id}
                     onClick={() => { if (!isAuthorizing) setActiveBrokerId(b.id); }}
-                    className={`p-3 rounded-md border text-left cursor-pointer transition flex items-center justify-between ${
+                    className={`p-3 rounded-xl border cursor-pointer transition-all duration-300 flex items-center justify-between ${
                       activeBrokerId === b.id 
-                        ? 'bg-zinc-900/80 border-zinc-600 text-white' 
-                        : 'bg-black/40 border-zinc-900 text-zinc-400 hover:border-zinc-850'
+                        ? 'bg-white/10 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
+                        : 'bg-black/40 border-white/5 hover:border-white/20'
                     }`}
                   >
                     <div>
@@ -164,158 +192,224 @@ export default function AtsAlgoTerminal() {
                       )}
                     </div>
                     <div>
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold border ${
-                        b.status === 'AUTHENTICATED' ? 'bg-emerald-950/50 text-emerald-400 border-emerald-900' :
-                        b.status === 'TOKEN_EXPIRED' ? 'bg-amber-950/50 text-amber-400 border-amber-900' :
-                        'bg-zinc-900 text-zinc-500 border-zinc-800'
+                      <span className={`text-[9px] px-2 py-1 rounded-md font-bold border transition-colors ${
+                        b.status === 'AUTHENTICATED' ? 'bg-emerald-950/30 text-emerald-400 border-emerald-900/50' :
+                        b.status === 'TOKEN_EXPIRED' ? 'bg-amber-950/30 text-amber-400 border-amber-900/50' :
+                        'bg-white/5 text-zinc-400 border-white/10'
                       }`}>
                         {b.status}
                       </span>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
-              {/* ACTIVE SELECTION LOGIN PANEL REPLICA */}
-              <div className="mt-4 pt-4 border-t border-zinc-800 space-y-3">
-                <span className="text-[10px] text-zinc-400 font-bold block uppercase tracking-wider">
-                  Generate Session Token: {brokers.find(b => b.id === activeBrokerId)?.name}
-                </span>
-                
-                {brokers.find(b => b.id === activeBrokerId)?.status === 'AUTHENTICATED' ? (
-                  <div className="bg-emerald-950/20 border border-emerald-900/60 p-3 rounded text-center text-xs text-emerald-400">
-                    ✓ Handshake Active. Data stream piped into local execution engine.
-                  </div>
-                ) : (
-                  <div className="space-y-2 text-xs">
-                    <input 
-                      type="text" 
-                      placeholder={`Enter Client ID (${brokers.find(b => b.id === activeBrokerId)?.clientIdPlaceholder})`}
-                      value={inputClientId}
-                      onChange={(e) => setInputClientId(e.target.value)}
-                      className="w-full bg-black border border-zinc-800 rounded p-2 focus:outline-none focus:border-zinc-700 text-white placeholder-zinc-700"
-                    />
-                    <input 
-                      type="password" 
-                      placeholder="Enter API Secret Key / Token"
-                      value={inputApiKey}
-                      onChange={(e) => setInputApiKey(e.target.value)}
-                      className="w-full bg-black border border-zinc-800 rounded p-2 focus:outline-none focus:border-zinc-700 text-white placeholder-zinc-700"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleBrokerConnect(activeBrokerId)}
-                      disabled={isAuthorizing}
-                      className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded text-xs tracking-wider transition"
-                    >
-                      {isAuthorizing ? 'VALIDATING CREDS...' : '🔑 AUTHORIZE LIVE ROUTING'}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+              {/* AUTH PANEL */}
+              <AnimatePresence mode="popLayout">
+                <motion.div 
+                  key={activeBrokerId}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-5 pt-5 border-t border-white/10 overflow-hidden"
+                >
+                  <span className="text-[10px] text-zinc-400 font-bold block uppercase tracking-wider mb-3">
+                    Generate Session Token: {brokers.find(b => b.id === activeBrokerId)?.name}
+                  </span>
+                  
+                  {brokers.find(b => b.id === activeBrokerId)?.status === 'AUTHENTICATED' ? (
+                    <div className="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg text-center text-xs text-emerald-400">
+                      ✓ Handshake Active. Data stream piped into local execution engine.
+                    </div>
+                  ) : (
+                    <div className="space-y-3 text-xs">
+                      <input 
+                        type="text" 
+                        placeholder={`Enter Client ID (${brokers.find(b => b.id === activeBrokerId)?.clientIdPlaceholder})`}
+                        value={inputClientId}
+                        onChange={(e) => setInputClientId(e.target.value)}
+                        className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 text-white placeholder-zinc-600 transition-all"
+                      />
+                      <input 
+                        type="password" 
+                        placeholder="Enter API Secret Key / Token"
+                        value={inputApiKey}
+                        onChange={(e) => setInputApiKey(e.target.value)}
+                        className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 text-white placeholder-zinc-600 transition-all"
+                      />
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        type="button"
+                        onClick={() => handleBrokerConnect(activeBrokerId)}
+                        disabled={isAuthorizing}
+                        className="w-full relative overflow-hidden bg-white hover:bg-zinc-200 text-black font-bold py-2.5 rounded-lg text-xs tracking-wider transition-colors disabled:opacity-50"
+                      >
+                        {isAuthorizing ? 'VALIDATING CREDS...' : '🔑 AUTHORIZE LIVE ROUTING'}
+                      </motion.button>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
 
-          {/* RIGHT 8 COLS: STRATEGY MANAGEMENT & ACTIVE ALGO DEPLOYMENT ENGINE */}
-          <div className="lg:col-span-8 space-y-4">
-            <div className="bg-[#12141c] border border-zinc-850 rounded-lg p-4">
-              <h2 className="text-xs font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-800 pb-2 mb-4">
-                2. Algorithmic Control Deck
+          {/* RIGHT COLUMN: ALGO CONTROL DECK (8 COLS) */}
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-8 flex flex-col gap-6"
+          >
+            <motion.div variants={itemVariants} className="glass-panel rounded-2xl p-6 border border-white/10">
+              <h2 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2 mb-4">
+                <span className="w-1 h-1 bg-white rounded-full" /> 2. Algorithmic Control Deck
               </h2>
 
-              {/* STRATEGY WORKSPACE GRID REPLICA */}
-              <div className="space-y-3">
-                {strategies.map((strat) => (
-                  <div 
-                    key={strat.id} 
-                    className={`p-4 rounded-lg border transition ${
-                      strat.deployed 
-                        ? 'bg-zinc-900/40 border-indigo-900/80 shadow-[inset_0_0_12px_rgba(79,70,229,0.05)]' 
-                        : 'bg-black/30 border-zinc-900'
-                    }`}
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-xs font-black text-white">{strat.title}</h3>
-                          <span className="text-[9px] bg-zinc-900 text-zinc-400 px-1 rounded border border-zinc-800 uppercase font-mono">
-                            {strat.type}
-                          </span>
+              <div className="grid grid-cols-1 gap-4">
+                {strategies.map((strat) => {
+                  // Determine wrapper class dynamically based on active status
+                  const isLive = strat.deployed;
+                  return (
+                    <motion.div 
+                      key={strat.id} 
+                      layout
+                      className={`relative p-5 rounded-xl border transition-all duration-500 ${
+                        isLive 
+                          ? 'bg-gradient-to-br from-indigo-900/30 to-black/50 border-indigo-500/30 shadow-[0_0_30px_rgba(79,70,229,0.1)]' 
+                          : 'bg-black/30 border-white/5'
+                      }`}
+                    >
+                      {/* Optional Animated Border Box for active ones */}
+                      {isLive && (
+                         <div className="absolute inset-0 pointer-events-none rounded-xl overflow-hidden">
+                           <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] animate-[spin-slow_4s_linear_infinite] bg-[conic-gradient(transparent,transparent,transparent,#6366f1)] opacity-20" />
+                         </div>
+                      )}
+                      
+                      <div className="relative z-10">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-black text-white">{strat.title}</h3>
+                              <span className="text-[9px] bg-white/10 text-zinc-300 px-1.5 py-0.5 rounded uppercase font-mono tracking-wider">
+                                {strat.type}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 mt-1 font-sans">Asset Focus: <span className="text-zinc-200 font-bold">{strat.instrument}</span></p>
+                          </div>
+
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            type="button"
+                            onClick={() => toggleStrategyDeployment(strat.id)}
+                            className={`w-full sm:w-32 py-2 px-3 rounded-lg text-[10px] font-black tracking-widest text-center transition-all ${
+                              isLive 
+                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20' 
+                                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20'
+                            }`}
+                          >
+                            {isLive ? '🔴 HALT ALGO' : '⚡ DEPLOY LIVE'}
+                          </motion.button>
                         </div>
-                        <p className="text-[10px] text-zinc-500 mt-0.5">Asset Focus: <span className="text-zinc-400 font-bold">{strat.instrument}</span></p>
-                      </div>
 
-                      {/* DEPLOY BUTTON TOGGLE */}
-                      <div>
-                        <button
-                          type="button"
-                          onClick={() => toggleStrategyDeployment(strat.id)}
-                          className={`w-full sm:w-28 py-1.5 px-3 rounded text-[10px] font-black tracking-widest text-center transition border ${
-                            strat.deployed 
-                              ? 'bg-rose-950 text-rose-400 border-rose-800 hover:bg-rose-900' 
-                              : 'bg-emerald-950 text-emerald-400 border-emerald-800 hover:bg-emerald-900'
-                          }`}
-                        >
-                          {strat.deployed ? '🔴 HALT ALGO' : '⚡ DEPLOY LIVE'}
-                        </button>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-4 border-t border-white/5 text-[11px]">
+                          <div>
+                            <span className="text-[9px] text-zinc-500 block uppercase tracking-wider">Min Investment</span>
+                            <span className="text-white font-bold">{strat.minCapital}</span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-zinc-500 block uppercase tracking-wider">Historical ROI</span>
+                            <span className="text-indigo-400 font-bold">{strat.historicalRoi}</span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-zinc-500 block uppercase tracking-wider">Risk Weight</span>
+                            <span className={`font-bold ${
+                              strat.riskProfile === 'High' ? 'text-rose-400' :
+                              strat.riskProfile === 'Moderate' ? 'text-amber-400' : 'text-emerald-400'
+                            }`}>{strat.riskProfile}</span>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <span className="text-[9px] text-zinc-500 block uppercase tracking-wider">Live P&L</span>
+                            <motion.span 
+                              key={strat.livePnl}
+                              initial={{ opacity: 0.5, y: -2 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className={`font-bold tabular-nums text-sm block mt-0.5 ${
+                                !isLive ? 'text-zinc-600' :
+                                strat.livePnl >= 0 ? 'text-emerald-400' : 'text-rose-500'
+                              }`}
+                            >
+                              {!isLive ? 'Inactive' : `${strat.livePnl >= 0 ? '+' : ''}₹${strat.livePnl}`}
+                            </motion.span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* METRIC FOOTER STRIP INSIDE THE DEPLOYMENT CARDS */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-3 border-t border-zinc-900/60 text-[11px]">
-                      <div>
-                        <span className="text-[9px] text-zinc-500 block uppercase">Min Investment</span>
-                        <span className="text-white font-bold">{strat.minCapital}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-zinc-500 block uppercase">Historical Backtest ROI</span>
-                        <span className="text-indigo-400 font-bold">{strat.historicalRoi}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-zinc-500 block uppercase">Risk Engine Weight</span>
-                        <span className={`font-bold ${
-                          strat.riskProfile === 'High' ? 'text-rose-400' :
-                          strat.riskProfile === 'Moderate' ? 'text-amber-400' : 'text-emerald-400'
-                        }`}>{strat.riskProfile}</span>
-                      </div>
-                      <div className="text-right sm:text-right">
-                        <span className="text-[9px] text-zinc-500 block uppercase">Live Run P&L</span>
-                        <span className={`font-bold font-mono ${
-                          !strat.deployed ? 'text-zinc-600' :
-                          strat.livePnl >= 0 ? 'text-emerald-400' : 'text-rose-500'
-                        }`}>
-                          {!strat.deployed ? 'Inactive' : `${strat.livePnl >= 0 ? '+' : ''}₹${strat.livePnl}`}
-                        </span>
-                      </div>
-                    </div>
-
-                  </div>
-                ))}
+                    </motion.div>
+                  )
+                })}
               </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
 
+      {/* FLOATING BOTTOM DOCK: DIAGNOSTICS & AGGREGATE P&L */}
+      <motion.div 
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.3 }}
+        className="fixed bottom-0 left-0 right-0 z-50 p-4 pointer-events-none"
+      >
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 pointer-events-auto">
+          {/* EVENT FEED (Flex grows to take available space) */}
+          <div className="glass-panel flex-1 rounded-xl p-3 border border-white/10 shadow-2xl overflow-hidden flex flex-col h-24">
+            <div className="flex justify-between items-center mb-1 pb-1 border-b border-white/5">
+              <span className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" /> Diagnostics Feed
+              </span>
+              <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Kernel Secure</span>
+            </div>
+            <div className="flex-1 overflow-y-auto pr-2 space-y-1 scrollbar-hide">
+              <AnimatePresence>
+                {terminalLogs.map((log, index) => (
+                  <motion.div 
+                    key={log + index} 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-[10px] text-zinc-400 font-mono leading-tight whitespace-pre-wrap break-words"
+                  >
+                    {log}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </div>
 
+          {/* AGGREGATE P&L HIGHLIGHT */}
+          <div className="glass-panel w-full md:w-64 rounded-xl p-4 border border-white/10 shadow-2xl flex flex-col justify-center relative overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/20 to-transparent pointer-events-none" />
+             <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold relative z-10">
+               Unrealized Net P&L
+             </span>
+             <motion.div 
+               key={aggregatePnl}
+               initial={{ scale: 0.95 }}
+               animate={{ scale: 1 }}
+               className={`text-2xl font-black tabular-nums tracking-tighter relative z-10 mt-1 ${aggregatePnl >= 0 ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.3)]'}`}
+             >
+               {aggregatePnl >= 0 ? '▲ +' : '▼ '}₹{aggregatePnl.toLocaleString('en-IN')}
+             </motion.div>
+          </div>
         </div>
-      </div>
-
-      {/* FOOTER EVENT STREAM - HIGHLY CHARACTERISTIC OF REAL TERMINALS */}
-      <div className="mt-6 pt-4 border-t border-zinc-800">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-[10px] font-bold text-zinc-400 block uppercase tracking-widest">
-            System Event Diagnostics Feed
-          </span>
-          <span className="text-[9px] text-zinc-600 uppercase">Status: Kernel Secure</span>
-        </div>
-        <div className="bg-black border border-zinc-900 rounded p-3 h-24 overflow-y-auto text-left space-y-1 select-all">
-          {terminalLogs.map((log, index) => (
-            <div key={index} className="text-[10px] text-zinc-400 font-mono leading-tight whitespace-pre-wrap">
-              {log}
-            </div>
-          ))}
-        </div>
-      </div>
-
+      </motion.div>
+      
+      {/* Utility to hide scrollbar on feed */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
     </div>
   );
 }
