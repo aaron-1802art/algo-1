@@ -1,145 +1,112 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+}
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-raised: #FFFFFF;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(76, 127, 255, 0.35);
+    
+    --text-primary: #18181B;
+    --text-secondary: #565E70;
+    --text-tertiary: #8A93A6;
+    
+    --accent: #4C7FFF;
+    --accent-dim: #2C4B99;
+    --accent-glow: rgba(76, 127, 255, 0.18);
+    --accent-soft-bg: rgba(76, 127, 255, 0.08);
+    
+    --hairline-gradient: linear-gradient(90deg, transparent, rgba(76,127,255,0.4), transparent);
+    
+    --radius: 18px;
+    --radius-sm: 12px;
+    
+    --shadow-card: 0 1px 0 rgba(0,0,0,0.04) inset, 0 10px 20px -10px rgba(0,0,0,0.1);
+    --shadow-lift: 0 1px 0 rgba(0,0,0,0.06) inset, 0 15px 30px -10px rgba(76,127,255,0.15);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Base surfaces — shifted to a much stronger Deep Navy/Sapphire instead of near-black */
+    --bg: #091124;
+    --surface: #101B36;
+    --surface-raised: #17274B;
+    --border: rgba(120, 160, 255, 0.15);
+    --border-hover: rgba(120, 160, 255, 0.45);
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    /* Text */
+    --text-primary: #F0F4FA;
+    --text-secondary: #9AA6C8;
+    --text-tertiary: #65749E;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    /* The one accent — a refined sapphire */
+    --accent: #4C7FFF;
+    --accent-dim: #2C4B99;
+    --accent-glow: rgba(76, 127, 255, 0.3);
+    --accent-soft-bg: rgba(76, 127, 255, 0.12);
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Metallic hairline accent for premium touches */
+    --hairline-gradient: linear-gradient(90deg, transparent, rgba(120,160,255,0.6), transparent);
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --radius: 18px;
+    --radius-sm: 12px;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --shadow-card: 0 1px 0 rgba(255,255,255,0.06) inset, 0 20px 40px -20px rgba(0,0,0,0.5);
+    --shadow-lift: 0 1px 0 rgba(255,255,255,0.1) inset, 0 30px 60px -20px rgba(76,127,255,0.35);
   }
-}
 
-@layer base {
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--bg);
+    color: var(--text-primary);
   }
 }
 
-/* Custom Animations for ALGO1 Dashboard */
-
-@keyframes mesh-gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.bg-mesh-gradient {
-  background: linear-gradient(-45deg, #09090b, #18181b, #064e3b, #000000, #312e81, #09090b);
-  background-size: 400% 400%;
-  animation: mesh-gradient 20s ease infinite;
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animated-border-box {
-  position: relative;
-  overflow: hidden;
-  border-radius: 0.75rem;
-}
-
-.animated-border-box::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(transparent, transparent, transparent, #10b981);
-  animation: spin-slow 4s linear infinite;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 0;
-}
-
-.animated-border-box:hover::before {
-  opacity: 0.8;
-}
-
-.animated-border-box::after {
-  content: "";
-  position: absolute;
-  inset: 1px;
-  background: rgba(24, 24, 27, 0.95);
-  border-radius: 0.75rem;
-  z-index: 1;
-}
-
-.content-z-10 {
-  position: relative;
-  z-index: 10;
-}
-
-/* Enhanced Number Ticker */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Glassmorphism utility */
-.glass-panel {
-  background: rgba(24, 24, 27, 0.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+@layer components {
+  .card {
+    background: linear-gradient(180deg, var(--surface-raised), var(--surface));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  
+  .card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-3px);
+  }
+  
+  .icon-chip {
+    width: 44px; 
+    height: 44px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft-bg);
+    border: 1px solid rgba(120,160,255,0.15);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    color: var(--accent);
+  }
+  
+  .btn-primary {
+    background: linear-gradient(180deg, #5C8CFF, var(--accent));
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 8px 24px -8px var(--accent-glow);
+  }
+  
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  
+  .btn-secondary:hover { 
+    border-color: var(--border-hover); 
+  }
 }
