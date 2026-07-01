@@ -75,7 +75,7 @@ export function EquityChart({ data, initialBalance = 100000 }: EquityChartProps)
           <Tooltip 
             contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#f8fafc' }}
             itemStyle={{ color: gradientColor, fontWeight: 'bold' }}
-            formatter={(value: number) => [`$${value.toFixed(2)}`, 'Equity']}
+            formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Equity']}
             labelStyle={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}
           />
           <Area 
