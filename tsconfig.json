@@ -30,5 +30,17 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules", 
+    "src/components/algoswift", 
+    "src/components/greenmotive", 
+    "src/components/dashboard",
+    "src/components/ui/glass-*.tsx",
+    "src/components/sections/Glass*.tsx",
+    "src/components/ui/unified-*.tsx",
+    "src/components/ui/interactive-*.tsx",
+    "src/components/ui/premium-*.tsx",
+    "src/components/ui/linear-*.tsx",
+    "src/components/ui/be-ui-*.tsx"
+  ]
 }
