@@ -57,7 +57,7 @@ export function HowItWorks() {
     }
   }, [activeDemoStep]);
 
-  const smoothTransition = { duration: 0.5, ease: [0.22, 1, 0.36, 1] };
+  const smoothTransition: any = { duration: 0.5, ease: [0.22, 1, 0.36, 1] };
 
   return (
     <section className="py-32 bg-[var(--bg)] px-6">
